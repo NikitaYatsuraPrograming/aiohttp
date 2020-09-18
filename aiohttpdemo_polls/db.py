@@ -11,6 +11,7 @@ from sqlalchemy import (MetaData,
 __all__ = ['question', 'choice']
 meta = MetaData()
 
+# Создание таблицы
 question = Table(
     'question', meta,
 
@@ -19,6 +20,7 @@ question = Table(
     Column('pub_date', Date, nullable=False)
 )
 
+# Создание таблицы
 choice = Table(
     'choice', meta,
 
@@ -31,6 +33,13 @@ choice = Table(
 
 
 async def init_pg(app):
+    """
+    Иницализация бд (все переменные берутся из config/polls.yaml)
+
+    :param app:
+    :return:
+    """
+
     conf = app['config']['postgres']
     engine = await aiopg.sa.create_engine(
         database=conf['database'],
@@ -45,5 +54,12 @@ async def init_pg(app):
 
 
 async def close_pg(app):
+    """
+    Закрытие бд
+
+    :param app:
+    :return:
+    """
+
     app['db'].close()
     await app['db'].wait_closed()

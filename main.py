@@ -9,13 +9,22 @@ from middlewares import setup_middlewares
 
 app = web.Application()
 app['config'] = config
-aiohttp_jinja2.setup(app,
-    loader=jinja2.FileSystemLoader(str(BASE_DIR / 'aiohttpdemo_polls' / 'templates')))
 
+# Загрузка шаблонизатора
+aiohttp_jinja2.setup(app,
+                     loader=jinja2.FileSystemLoader(
+                         str(BASE_DIR / 'aiohttpdemo_polls' / 'templates'))
+                     )
+
+# Загрузка путей
 setup_routes(app)
+
+# Работа над открытием и закрытием бд
 app.on_startup.append(init_pg)
 app.on_cleanup.append(close_pg)
+
+# Загрузка middlewares
 setup_middlewares(app)
 
+# Запуск приложения
 web.run_app(app, port=9090)
-
