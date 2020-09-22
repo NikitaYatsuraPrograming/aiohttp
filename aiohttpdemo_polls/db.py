@@ -45,16 +45,39 @@ async def add_in_db_question(question_text, pub_date):
 
 
 async def get_question(id_question):
+    """
+    Вывод информации по айди
+
+    :param id_question:
+    :return:
+    """
+
     t = conn.execute(question.select().where(question.c.id == id_question))
     return t
 
 
 async def update_question_in_db(id_question, question_text, pub_date):
+    """
+    Обновление
+
+    :param id_question:
+    :param question_text:
+    :param pub_date:
+    :return:
+    """
+
     conn.execute(question.update().where(question.c.id == id_question).values(question_text=question_text,
                                                                               pub_date=pub_date))
 
 
 async def delete_question_in_db(id_question):
+    """
+    Удаление
+
+    :param id_question:
+    :return:
+    """
+
     conn.execute(question.delete().where(question.c.id == id_question))
 
 

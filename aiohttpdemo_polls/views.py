@@ -46,6 +46,13 @@ async def add_question(request):
 
 @aiohttp_jinja2.template('detail.html')
 async def details_question(request):
+    """
+    Вывод всей информации по айди с таблицы question
+
+    :param request:
+    :return:
+    """
+
     id_question = request.match_info['name']
     result = await get_question(id_question)
     result = result.fetchone()
@@ -55,6 +62,12 @@ async def details_question(request):
 
 @aiohttp_jinja2.template('update_question.html')
 async def update_question(request):
+    """
+    Обновдение информации в таблице question по айди
+
+    :param request:
+    :return:
+    """
     id_question = request.match_info['name']
 
     if request.method == 'POST':
@@ -73,6 +86,12 @@ async def update_question(request):
 
 @aiohttp_jinja2.template('delete.html')
 async def delete_question(request):
+    """
+    Удаление записей из таблицы question по айди
+
+    :param request:
+    :return:
+    """
     if request.method == 'POST':
         id_question = request.match_info['name']
         await delete_question_in_db(id_question)
