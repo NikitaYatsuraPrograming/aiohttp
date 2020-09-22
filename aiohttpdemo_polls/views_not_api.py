@@ -1,6 +1,3 @@
-import datetime
-import json
-
 import aiohttp_jinja2
 from aiohttp import web
 
@@ -9,6 +6,7 @@ from aiohttpdemo_polls import db
 from aiohttpdemo_polls.db import add_in_db_question, get_question, update_question_in_db, delete_question_in_db
 
 
+# Декоратор шаблонизатора
 @aiohttp_jinja2.template('index.html')
 async def index(request):
     """
@@ -24,13 +22,7 @@ async def index(request):
         cursor = await conn.execute(db.question.select())
         records = await cursor.fetchall()
         questions = [dict(q) for q in records]
-
-        def default(o):
-            if isinstance(o, (datetime.date, datetime.datetime)):
-                return o.isoformat()
-
-        j = json.dumps(questions, sort_keys=True, indent=1, default=default)
-        return web.json_response(j)
+        return {"questions": questions}
 
 
 @aiohttp_jinja2.template('add_question.html')
@@ -42,23 +34,17 @@ async def add_question(request):
     :return:
     """
 
-    # print(request.query_string)
-    form = request.query_string.split('&')
-    d = {}
-    for i in form:
-        t = i.split('=')
-        d[t[0]] = t[1]
-
     if request.method == 'POST':
-        # form = await request.post()
-        question_text = d['question_text']
-        pub_date = d['pub_date']
+        form = await request.post()
+        question_text = form['question_text']
+        pub_date = form['pub_date']
         await add_in_db_question(question_text, pub_date)
         location = request.app.router['index'].url_for()
         raise web.HTTPFound(location=location)
     return {}
 
 
+@aiohttp_jinja2.template('detail.html')
 async def details_question(request):
     """
     Вывод всей информации по айди с таблицы question
@@ -68,23 +54,14 @@ async def details_question(request):
     """
 
     id_question = request.match_info['name']
+    print(id_question)
     result = await get_question(id_question)
     result = result.fetchone()
 
-    j = {
-        'id': result[0],
-        'question_text': result[1],
-        'pub_date': result[2]
-    }
-
-    def default(o):
-        if isinstance(o, (datetime.date, datetime.datetime)):
-            return o.isoformat()
-
-    j = json.dumps(j, sort_keys=True, indent=1, default=default)
-    return web.json_response(j)
+    return {'result': result}
 
 
+@aiohttp_jinja2.template('update_question.html')
 async def update_question(request):
     """
     Обновдение информации в таблице question по айди
@@ -94,16 +71,10 @@ async def update_question(request):
     """
     id_question = request.match_info['name']
 
-    form = request.query_string.split('&')
-    d = {}
-    for i in form:
-        t = i.split('=')
-        d[t[0]] = t[1]
-
     if request.method == 'POST':
-        # form = await request.post()
-        question_text = d['question_text']
-        pub_date = d['pub_date']
+        form = await request.post()
+        question_text = form['question_text']
+        pub_date = form['pub_date']
         await update_question_in_db(id_question, question_text, pub_date)
         raise web.HTTPFound('/')
     else:
@@ -111,18 +82,7 @@ async def update_question(request):
         result = await get_question(id_question)
         result = result.fetchone()
 
-        j = {
-            'id': result[0],
-            'question_text': result[1],
-            'pub_date': result[2]
-        }
-
-        def default(o):
-            if isinstance(o, (datetime.date, datetime.datetime)):
-                return o.isoformat()
-
-        j = json.dumps(j, sort_keys=True, indent=1, default=default)
-        return web.json_response(j)
+        return {'result': result}
 
 
 @aiohttp_jinja2.template('delete.html')

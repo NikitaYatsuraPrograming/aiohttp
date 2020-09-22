@@ -27,4 +27,4 @@ app.on_cleanup.append(close_pg)
 setup_middlewares(app)
 
 # Запуск приложения
-web.run_app(app, port=9000)
+web.run_app(app)
