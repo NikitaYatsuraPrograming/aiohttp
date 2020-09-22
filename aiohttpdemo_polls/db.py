@@ -5,10 +5,10 @@ from sqlalchemy import (MetaData,
                         ForeignKey,
                         Integer,
                         String,
-                        Date)
+                        Date, create_engine)
 
+from aiohttpdemo_polls.settings import config
 
-__all__ = ['question', 'choice']
 meta = MetaData()
 
 # Создание таблицы
@@ -30,6 +30,32 @@ choice = Table(
 
     Column('question_id', Integer, ForeignKey('question.id', ondelete='CASCADE'))
 )
+
+DNS = "postgresql://{user}:{password}@{host}:{port}/{database}"
+db_url = DNS.format(**config['postgres'])
+engine = create_engine(db_url)
+conn = engine.connect()
+
+
+async def add_in_db_question(question_text, pub_date):
+    conn.execute(question.insert(), [
+        {'question_text': question_text,
+         'pub_date': pub_date}
+    ])
+
+
+async def get_question(id_question):
+    t = conn.execute(question.select().where(question.c.id == id_question))
+    return t
+
+
+async def update_question_in_db(id_question, question_text, pub_date):
+    conn.execute(question.update().where(question.c.id == id_question).values(question_text=question_text,
+                                                                              pub_date=pub_date))
+
+
+async def delete_question_in_db(id_question):
+    conn.execute(question.delete().where(question.c.id == id_question))
 
 
 async def init_pg(app):
