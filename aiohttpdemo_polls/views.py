@@ -9,7 +9,14 @@ from aiohttpdemo_polls import db
 from aiohttpdemo_polls.db import add_in_db_question, get_question, update_question_in_db, delete_question_in_db
 
 
-def split_and_adding_in_dict(request):
+async def split_and_adding_in_dict(request):
+    """
+    Разделяет строку и записывает в словарь как ключ и значение
+
+    :param request:
+    :return:
+    """
+
     form = request.query_string.split('&')
     d = {}
     for i in form:
@@ -23,6 +30,13 @@ def split_and_adding_in_dict(request):
 
 
 async def get_results_and_writing_in_dict(request):
+    """
+    Получаем записи из бд и записываем их в словарь
+
+    :param request:
+    :return:
+    """
+
     id_question = request.match_info['name']
     result = await get_question(id_question)
     result = result.fetchone()
@@ -37,6 +51,13 @@ async def get_results_and_writing_in_dict(request):
 
 
 def dump_json(j):
+    """
+    Получаем дату из модуля datetime, и дампим в json
+
+    :param j:
+    :return:
+    """
+
     def default(o):
         if isinstance(o, (datetime.date, datetime.datetime)):
             return o.isoformat()
@@ -74,7 +95,7 @@ async def add_question(request):
     """
 
     if request.method == 'POST':
-        d, question_text, pub_date = split_and_adding_in_dict(request)
+        d, question_text, pub_date = await split_and_adding_in_dict(request)
 
         await add_in_db_question(question_text, pub_date)
         location = request.app.router['index'].url_for()
@@ -90,7 +111,7 @@ async def details_question(request):
     :return:
     """
 
-    j = get_results_and_writing_in_dict(request)
+    j = await get_results_and_writing_in_dict(request)
 
     j = dump_json(j)
     return web.json_response(j)
@@ -106,11 +127,11 @@ async def update_question(request):
     id_question = request.match_info['name']
 
     if request.method == 'POST':
-        d, question_text, pub_date = split_and_adding_in_dict(request)
+        d, question_text, pub_date = await split_and_adding_in_dict(request)
 
         await update_question_in_db(id_question, question_text, pub_date)
     else:
-        j = get_results_and_writing_in_dict(request)
+        j = await get_results_and_writing_in_dict(request)
 
         j = dump_json(j)
         return web.json_response(j)
