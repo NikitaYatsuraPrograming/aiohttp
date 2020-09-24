@@ -14,6 +14,6 @@ def setup_routes(app):
     app.router.add_post('/add_question', add_question)
     app.router.add_get(r'/{name:[0-9]+}', details_question)
     app.router.add_get(r'/update/{name:[0-9]+}', update_question)
-    app.router.add_post(r'/update/{name:[0-9]+}', update_question)
+    app.router.add_put(r'/update/{name:[0-9]+}', update_question)
     app.router.add_get(r'/delete/{name:[0-9]+}', delete_question)
-    app.router.add_post(r'/delete/{name:[0-9]+}', delete_question)
+    app.router.add_delete(r'/delete/{name:[0-9]+}', delete_question)

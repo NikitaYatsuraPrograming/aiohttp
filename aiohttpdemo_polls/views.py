@@ -126,18 +126,17 @@ async def update_question(request):
     """
     id_question = request.match_info['name']
 
-    if request.method == 'POST':
+    if request.method == 'PUT':
         d, question_text, pub_date = await split_and_adding_in_dict(request)
 
         await update_question_in_db(id_question, question_text, pub_date)
-    else:
-        j = await get_results_and_writing_in_dict(request)
 
-        j = dump_json(j)
-        return web.json_response(j)
+    j = await get_results_and_writing_in_dict(request)
+
+    j = dump_json(j)
+    return web.json_response(j)
 
 
-@aiohttp_jinja2.template('delete.html')
 async def delete_question(request):
     """
     Удаление записей из таблицы question по айди
@@ -145,9 +144,12 @@ async def delete_question(request):
     :param request:
     :return:
     """
-    if request.method == 'POST':
+    if request.method == 'DELETE':
+        j = await get_results_and_writing_in_dict(request)
+
+        j = dump_json(j)
+
         id_question = request.match_info['name']
         await delete_question_in_db(id_question)
 
-    else:
-        return {}
+        return web.json_response(j)
